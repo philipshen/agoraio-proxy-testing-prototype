@@ -20,6 +20,7 @@ export default function SendReceiveTestScreen() {
   const AgoraVersionContext = React.useContext(AgoraContainer.Context);
   const [testStatus, setTestStatus] = React.useState(TestStatus.STOPPED)
   const [testMetadata, setTestMetadata] = React.useState()
+  const [eagerEnableProxy, setEagerEnableProxy] = React.useState(false)
   const senderDomId = "send-stream"
   const receiverDomId = "recv-stream"
 
@@ -34,7 +35,7 @@ export default function SendReceiveTestScreen() {
 
   const startTest = async () => {
     setTestStatus(TestStatus.INITIALIZING)
-    const data = await AgoraV4Impl.startSendReceiveTest(senderDomId, receiverDomId)
+    const data = await AgoraV4Impl.startSendReceiveTest(senderDomId, receiverDomId, eagerEnableProxy)
     setTestStatus(TestStatus.RUNNING)
     setTestMetadata(data)
   }
@@ -73,8 +74,7 @@ export default function SendReceiveTestScreen() {
           }
         })()}
       </button>
-      {/* Metadata & Controls */}
-      <h3>Agora SDK version</h3>
+      <h3>Control Panel</h3>
       {Object.values(AgoraVersion).map((version) => {
         return (
           <button 
@@ -86,6 +86,16 @@ export default function SendReceiveTestScreen() {
           </button>
         )
       })}
+      <div style={{marginTop: 8}}>
+        <label for="eagerEnableProxyCheckbox">Enable proxy</label>
+        <input 
+          type="checkbox" 
+          name="eagerEnableProxyCheckbox" 
+          checked={eagerEnableProxy}
+          onChange={(event) => setEagerEnableProxy(event.target.checked)}
+        ></input>
+      </div>
+
       <h3>Test Metadata</h3>
       <p style={{width: "60%", wordBreak: "break-all"}}>
         {JSON.stringify(testMetadata)}

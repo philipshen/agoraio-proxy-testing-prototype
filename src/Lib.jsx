@@ -2,11 +2,6 @@
 /** @jsx jsx */
 import { jsx, Global, css } from "@emotion/react";
 import React from "react";
-import ProximaNovaThin from "/fonts/ProximaNova-Thin.ttf";
-import ProximaNovaLight from "/fonts/ProximaNova-Light.ttf";
-import ProximaNovaReg from "/fonts/ProximaNova-Reg.ttf";
-import ProximaNovaSbold from "/fonts/ProximaNova-Sbold.ttf";
-import ProximaNovaBold from "/fonts/ProximaNova-Bold.ttf";
 
 export const ViewportSize = {
   width: "100vw",
@@ -51,12 +46,10 @@ Bx.displayName = "Bx";
 function customFont(name, ttf, weight) {
   return {
     "@font-face": {
-      fontFamily: "ProximaNova",
       fontStyle: "normal",
       fontDisplay: "swap",
       fontWeight: weight,
       src: `
-      local('ProximaNova'),
       local('${name}'),
       url(${ttf}) format('truetype')
     `,
@@ -97,17 +90,9 @@ export function CssBaseline() {
   return (
     <Global
       styles={[
-        // * following the conventions here:
-        // * https://cssreference.io/property/font-weight/
-        customFont("ProximaNova-Thin", ProximaNovaThin, 100),
-        customFont("ProximaNova-Light", ProximaNovaLight, 200),
-        customFont("ProximaNova-Reg", ProximaNovaReg, 400),
-        customFont("ProximaNova-Sbold", ProximaNovaSbold, 600),
-        customFont("ProximaNova-Bold", ProximaNovaBold, 700),
-
         css`
           :root {
-            --font-family: ProximaNova, -apple-system, sans-serif;
+            --font-family: -apple-system, sans-serif;
             --font-size: 16px;
             --font-weight: 400;
           }

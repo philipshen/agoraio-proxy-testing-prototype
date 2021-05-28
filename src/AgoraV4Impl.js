@@ -23,11 +23,18 @@ let receiverClient;
  * @param {*} client 
  * @param {*} eagerUseProxy 
  */
-async function _joinChannelWithRetry(agoraConfig, uid, token, client, eagerUseProxy = false) {
+async function _joinChannelWithRetry(agoraConfig, uid, token, eagerUseProxy = false) {
+  const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
+  AgoraRTC.setParameter("SUBSCRIBE_TCC", false);
+
+  if (eagerUseProxy) {
+    client.startProxyServer(3)
+  }
+
   const joinPromise = client.join(agoraConfig.appId, agoraConfig.channel, token, uid);
   if (eagerUseProxy) {
-    const id = await joinPromise
-    return id
+    await joinPromise
+    return client
   }
 
   // On timeout, connection via proxy server
@@ -39,11 +46,12 @@ async function _joinChannelWithRetry(agoraConfig, uid, token, client, eagerUsePr
   );
 
   try {
-    const id = await Promise.race([timeoutPromise, joinPromise]);
-    return id
+    await Promise.race([timeoutPromise, joinPromise]);
+    return client
   } catch (error) {
-    console.log("Join channel failed; retrying with proxy", error)
-    return _joinChannelWithRetry(agoraConfig, uid, token, client, true)
+    console.warn("Join channel failed; retrying with proxy", error)
+    client.leave()
+    return _joinChannelWithRetry(agoraConfig, uid, token, true)
   }
 }
 
@@ -51,10 +59,10 @@ async function _joinChannelWithRetry(agoraConfig, uid, token, client, eagerUsePr
  * Stops the send/receive test
  */
 export async function stopSendReceiveTest() {
-  senderTracks.forEach((track) => track.stop())
+  senderTracks?.forEach((track) => track.stop())
   await Promise.all([
-    senderClient.leave(),
-    receiverClient.leave()
+    senderClient?.leave(),
+    receiverClient?.leave()
   ])
   senderClient = undefined;
   receiverClient = undefined;
@@ -68,29 +76,30 @@ export async function stopSendReceiveTest() {
  * @returns All the metadata returned by the server
  */
 export async function startSendReceiveTest(senderDomId, receiverDomId, eagerUseProxy = false) {
+  if (eagerUseProxy) {
+    console.warn("Eager enabling proxy")
+  }
+
   // Initialize Agora clients
   const testMetadata = await api.fetchSendReceiveTestData();
-  senderClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
-  receiverClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
   const agoraConfig = { channel: testMetadata.channel, appId: testMetadata.agoraAppId }
 
   try {
-    await Promise.all([
+    [senderClient, receiverClient] = await Promise.all([
       _joinChannelWithRetry(
         agoraConfig,
         testMetadata.senderUid,
         testMetadata.senderToken, 
-        senderClient, 
         eagerUseProxy
       ),
       _joinChannelWithRetry(
         agoraConfig, 
         testMetadata.receiverUid,
         testMetadata.receiverToken, 
-        receiverClient, 
         eagerUseProxy
       )
     ])
+    console.warn("Successfully joined channel")
 
     // Set up receiver event listeners
     receiverClient.on("user-published", async (remoteUser, mediaType) => {
@@ -118,6 +127,7 @@ export async function startSendReceiveTest(senderDomId, receiverDomId, eagerUseP
     await senderClient.publish(senderTracks)
     senderTracks[1].play(senderDomId) // Just play the video track
   } catch (error) {
+    console.error(error)
     stopSendReceiveTest()
   }
 

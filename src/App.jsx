@@ -6,6 +6,7 @@ import { Bx, CssBaseline, theme, HFlex, VFlex } from "./Lib";
 import SendReceiveTestScreen from "./SendReceiveTestScreen";
 import * as AgoraVersionContainer from "./AgoraVersionContainer";
 import * as DurableState from "./DurableState";
+import * as api from "./API"
 
 // + compile to static build
 // + highlight item(s) at cursor line
@@ -34,7 +35,7 @@ function Root() {
       throw new Error(`unrecognized screen id: ${screenId}`);
     putCurrentScreenId(screenId);
   };
-
+  
   return (
     <Bx
       sx={{

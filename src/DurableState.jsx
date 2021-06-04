@@ -104,7 +104,6 @@ export function Provider({ names = [], children }) {
 }
 
 // * everything below is the private implementation
-
 const Context = React.createContext(null);
 
 function assertNameFormat(name) {

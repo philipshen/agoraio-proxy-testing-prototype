@@ -6,6 +6,7 @@
 import { jsx } from "@emotion/react";
 import React from "react";
 import AgoraVersion from "./AgoraVersion";
+import * as DurableState from "./DurableState";
 
 export const Context = React.createContext();
 
@@ -23,12 +24,12 @@ const agoraCdnUrls = {
  * @param {Props} props 
  */
 export function Provider(props) {
-  const agoraVersion = React.useRef(window.localStorage.getItem("agora_version"))
+  const [agoraVersion, setAgoraVersion] = DurableState.use("local.agora_version", AgoraVersion.v4_4_0)
   const [isAgoraDownloaded, setIsAgoraDownloaded] = React.useState(false);
 
   React.useEffect(() => {
     // Load Agora
-    let cdnUrl = agoraCdnUrls[agoraVersion.current];
+    let cdnUrl = agoraCdnUrls[agoraVersion];
     if (!cdnUrl) {
       cdnUrl = agoraCdnUrls[AgoraVersion.v4_4_0];
     }
@@ -51,16 +52,16 @@ export function Provider(props) {
   }, []);
 
   const setVersion = React.useCallback((version) => {
-    if (version === agoraVersion.current) {
+    if (version === agoraVersion) {
       return;
     }
     
-    window.localStorage.setItem("agora_version", version);
+    setAgoraVersion(version)
     window.location.reload()
-  }, [agoraVersion.current])
+  }, [agoraVersion])
 
   return (
-    <Context.Provider value={{ setVersion, agoraVersion: agoraVersion.current }}>
+    <Context.Provider value={{ setVersion, agoraVersion: agoraVersion }}>
       {isAgoraDownloaded ? props.children : props.loadingScreen}
     </Context.Provider>
   );

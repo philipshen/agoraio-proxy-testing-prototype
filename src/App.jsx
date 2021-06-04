@@ -15,11 +15,11 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AgoraVersionContainer.Provider loadingScreen={<Bx sx={{ color: "white" }}>Loading Agora....</Bx>}>
         <DurableState.Provider>
-          <Root />
+          <AgoraVersionContainer.Provider loadingScreen={<Bx sx={{ color: "white" }}>Loading Agora....</Bx>}>
+            <Root />
+          </AgoraVersionContainer.Provider>
         </DurableState.Provider>
-      </AgoraVersionContainer.Provider>
     </ThemeProvider>
   );
 }

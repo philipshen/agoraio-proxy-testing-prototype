@@ -8,7 +8,8 @@ import React from "react";
 import { Bx } from "./Lib";
 import * as AgoraContainer from "./AgoraVersionContainer"
 import AgoraVersion from "./AgoraVersion"
-import * as AgoraV4Impl from "./AgoraV4Impl"
+import * as AgoraV4Impl from "./agora/v4/SendReceiveTest"
+import * as AgoraV3Impl from "./agora/v3/SendReceiveTest"
 import * as DurableState from "./DurableState"
 
 const TestStatus = {
@@ -35,20 +36,37 @@ export default function SendReceiveTestScreen() {
     marginTop: 40
   }
 
+  const useAgoraV3Api = AgoraVersionContext.agoraVersion.charAt(0) === "3"
+
   const startTest = async () => {
     setTestStatus(TestStatus.INITIALIZING)
-    const data = await AgoraV4Impl.startSendReceiveTest(
-      senderDomId, 
-      receiverDomId, 
-      eagerEnableProxy,
-      useTestMetadataCache
-    )
+    let metadata;
+    if (useAgoraV3Api) {
+      metadata = await AgoraV3Impl.startSendReceiveTest(
+        senderDomId,
+        receiverDomId,
+        eagerEnableProxy,
+        useTestMetadataCache  
+      )
+    } else {
+      metadata = await AgoraV4Impl.startSendReceiveTest(
+        senderDomId, 
+        receiverDomId, 
+        eagerEnableProxy,
+        useTestMetadataCache
+      )
+    }
+    
     setTestStatus(TestStatus.RUNNING)
-    setTestMetadata(data)
+    setTestMetadata(metadata)
   }
 
   const stopTest = async () => {
-    await AgoraV4Impl.stopSendReceiveTest()
+    if (useAgoraV3Api) {
+      await AgoraV3Impl.stopSendReceiveTest()
+    } else {
+      await AgoraV4Impl.stopSendReceiveTest()
+    }
     setTestMetadata(null)
     setTestStatus(TestStatus.STOPPED)
   }
@@ -94,7 +112,7 @@ export default function SendReceiveTestScreen() {
         )
       })}
       <div style={{marginTop: 8}}>
-        <label for="eagerEnableProxyCheckbox">Enable proxy</label>
+        <label for="eagerEnableProxyCheckbox">Eagerly enable proxy</label>
         <input 
           type="checkbox" 
           name="eagerEnableProxyCheckbox" 

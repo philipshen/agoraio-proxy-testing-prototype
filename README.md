@@ -1,5 +1,7 @@
 # Overview
 
+See: https://www.notion.so/experiencewelcome/PUBLIC-Repro-Agora-4-4-0-VPN-Issue-75c5510751db4e6988cb9e2a0b8a49a4
+
 Status: WIP
 
 This is a test environment to help us learn more about proxy, firewall, and VPN interactions with Agora. It's a WIP.

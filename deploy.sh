@@ -15,6 +15,6 @@ cd dist
 git add -A
 git commit -m 'deploy' && true
 
-git push -f $git_origin_url layerci:gh-pages
+git push -f $git_origin_url master:gh-pages
 
 cd -

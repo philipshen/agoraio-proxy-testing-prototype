@@ -9,6 +9,7 @@ import { Bx } from "./Lib";
 import * as AgoraContainer from "./AgoraVersionContainer"
 import AgoraVersion from "./AgoraVersion"
 import * as AgoraV4Impl from "./AgoraV4Impl"
+import * as DurableState from "./DurableState"
 
 const TestStatus = {
   STOPPED: 0,
@@ -20,7 +21,8 @@ export default function SendReceiveTestScreen() {
   const AgoraVersionContext = React.useContext(AgoraContainer.Context);
   const [testStatus, setTestStatus] = React.useState(TestStatus.STOPPED)
   const [testMetadata, setTestMetadata] = React.useState()
-  const [eagerEnableProxy, setEagerEnableProxy] = React.useState(false)
+  const [eagerEnableProxy, setEagerEnableProxy] = DurableState.use("local.eagerEnableProxy", false)
+  const [useTestMetadataCache, setUseTestMetadataCache] = DurableState.use("local.useTestMetadataCache", false)
   const senderDomId = "send-stream"
   const receiverDomId = "recv-stream"
 
@@ -35,7 +37,12 @@ export default function SendReceiveTestScreen() {
 
   const startTest = async () => {
     setTestStatus(TestStatus.INITIALIZING)
-    const data = await AgoraV4Impl.startSendReceiveTest(senderDomId, receiverDomId, eagerEnableProxy)
+    const data = await AgoraV4Impl.startSendReceiveTest(
+      senderDomId, 
+      receiverDomId, 
+      eagerEnableProxy,
+      useTestMetadataCache
+    )
     setTestStatus(TestStatus.RUNNING)
     setTestMetadata(data)
   }
@@ -93,6 +100,15 @@ export default function SendReceiveTestScreen() {
           name="eagerEnableProxyCheckbox" 
           checked={eagerEnableProxy}
           onChange={(event) => setEagerEnableProxy(event.target.checked)}
+        ></input>
+      </div>
+      <div style={{marginTop: 8}}>
+        <label for="eagerEnableProxyCheckbox">Use test metadata cache</label>
+        <input 
+          type="checkbox" 
+          name="eagerEnableProxyCheckbox" 
+          checked={useTestMetadataCache}
+          onChange={(event) => setUseTestMetadataCache(event.target.checked)}
         ></input>
       </div>
 

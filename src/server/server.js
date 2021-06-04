@@ -9,8 +9,9 @@ const port = process.env.SERVER_PORT
 
 app.get("/send-receive-test", Middleware.noCache, (_req, resp) => {
   resp.header('Access-Control-Allow-Origin', '*');
+  console.log("Hit send/receive test")
   const channel = "prototype-" + Math.random().toString(36).substring(7)
-  const expireTime = (Date.now() / 1000) + 3600 // 1 hour
+  const expireTime = (Date.now() / 1000) + (3600 * 12) // 12 hour
 
   // Sender
   const senderUid = 1111

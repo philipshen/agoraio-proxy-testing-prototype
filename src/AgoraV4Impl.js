@@ -12,6 +12,19 @@ let senderClient;
 let senderTracks;
 let receiverClient;
 
+function cacheTestMetadata(testMetadata) {
+  window.localStorage.setItem("agora_4_test_metadata", JSON.stringify(testMetadata));
+}
+
+function getCachedTestMetadata(testMetadata) {
+  const metadata = window.localStorage.getItem("agora_4_test_metadata")
+  if (!metadata) {
+    return;
+  }
+
+  return JSON.parse(metadata)
+}
+
 /**
  * @typedef {{
  *  appId: string,
@@ -49,7 +62,7 @@ async function _joinChannelWithRetry(agoraConfig, uid, token, eagerUseProxy = fa
     await Promise.race([timeoutPromise, joinPromise]);
     return client
   } catch (error) {
-    console.warn("Join channel failed; retrying with proxy", error)
+    console.debug("Join channel failed; retrying with proxy", error)
     client.leave()
     return _joinChannelWithRetry(agoraConfig, uid, token, true)
   }
@@ -75,13 +88,37 @@ export async function stopSendReceiveTest() {
  * @param {string} receiverDomId The dom ID to play the receiver's local stream on
  * @returns All the metadata returned by the server
  */
-export async function startSendReceiveTest(senderDomId, receiverDomId, eagerUseProxy = false) {
+export async function startSendReceiveTest(
+  senderDomId, 
+  receiverDomId, 
+  eagerUseProxy = false, 
+  useTestMetadataCache = false
+) {
   if (eagerUseProxy) {
-    console.warn("Eager enabling proxy")
+    console.debug("Eager enabling proxy")
+  }
+
+  // Fetch test metadata
+  let testMetadata;
+  if (useTestMetadataCache) {
+    testMetadata = getCachedTestMetadata()
+
+    if (testMetadata) {
+      console.debug("Using cached test metadata")
+    }
+  }
+
+  if (!testMetadata) {
+    console.debug("Fetching test metadata")
+    testMetadata = await api.fetchSendReceiveTestData();
+
+    if (useTestMetadataCache) {
+      console.debug("Caching test metadata")
+      cacheTestMetadata(testMetadata)
+    }
   }
 
   // Initialize Agora clients
-  const testMetadata = await api.fetchSendReceiveTestData();
   const agoraConfig = { channel: testMetadata.channel, appId: testMetadata.agoraAppId }
 
   try {
@@ -99,7 +136,7 @@ export async function startSendReceiveTest(senderDomId, receiverDomId, eagerUseP
         eagerUseProxy
       )
     ])
-    console.warn("Successfully joined channel")
+    console.debug("Successfully joined channel")
 
     // Set up receiver event listeners
     receiverClient.on("user-published", async (remoteUser, mediaType) => {

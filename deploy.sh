@@ -6,7 +6,7 @@ set -e
 # build
 npm run build
 
-git_origin_url=$(git remote get-url origin)
+git_origin_url=$(git remote get-url personal)
 
 # navigate into the build output directory
 cd dist
@@ -15,6 +15,6 @@ cd dist
 git add -A
 git commit -m 'deploy' && true
 
-git push -f $git_origin_url master:gh-pages
+git push -f $git_origin_url layerci:gh-pages
 
 cd -

@@ -45,8 +45,8 @@ export function Provider(props) {
     
     scriptPromise
       .then(() => {
-        console.debug("Successfully loaded Agora")
-        setIsAgoraDownloaded(true)
+        console.debug("Successfully loaded Agora");
+        setIsAgoraDownloaded(true);
       })
       .catch((err) => console.error("Failed to download Agora", err))
   }, []);

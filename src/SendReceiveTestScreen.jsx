@@ -41,24 +41,28 @@ export default function SendReceiveTestScreen() {
   const startTest = async () => {
     setTestStatus(TestStatus.INITIALIZING)
     let metadata;
-    if (useAgoraV3Api) {
-      metadata = await AgoraV3Impl.startSendReceiveTest(
-        senderDomId,
-        receiverDomId,
-        eagerEnableProxy,
-        useTestMetadataCache  
-      )
-    } else {
-      metadata = await AgoraV4Impl.startSendReceiveTest(
-        senderDomId, 
-        receiverDomId, 
-        eagerEnableProxy,
-        useTestMetadataCache
-      )
+    try {
+      if (useAgoraV3Api) {
+        metadata = await AgoraV3Impl.startSendReceiveTest(
+          senderDomId,
+          receiverDomId,
+          eagerEnableProxy,
+          useTestMetadataCache  
+        )
+      } else {
+        metadata = await AgoraV4Impl.startSendReceiveTest(
+          senderDomId, 
+          receiverDomId, 
+          eagerEnableProxy,
+          useTestMetadataCache
+        )
+      }
+      
+      setTestStatus(TestStatus.RUNNING)
+      setTestMetadata(metadata)
+    } catch (error) {
+      setTestStatus(TestStatus.STOPPED)
     }
-    
-    setTestStatus(TestStatus.RUNNING)
-    setTestMetadata(metadata)
   }
 
   const stopTest = async () => {
